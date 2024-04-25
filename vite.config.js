@@ -9,11 +9,7 @@ export default defineConfig({
       insertTypesEntry: true
     }),
     checker({
-      typescript: true,
-      eslint: {
-        lintCommand: 'eslint .',
-        useFlatConfig: true
-      }
+      typescript: true
     })
   ],
   build: {

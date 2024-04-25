@@ -1,5 +1,5 @@
 {
-  "name": "roslib",
+  "name": "ros2lib",
   "homepage": "https://robotwebtools.github.io",
   "description": "The standard ROS Javascript Library",
   "version": "1.4.1",
@@ -31,6 +31,7 @@
     "vitest": "^1.3.0"
   },
   "dependencies": {
+    "buffer": "6.0.3",
     "@xmldom/xmldom": "^0.8.0",
     "cbor-js": "^0.1.0",
     "eventemitter3": "^5.0.1",
