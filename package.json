@@ -50,7 +50,8 @@
     "doc": "jsdoc -r -c jsdoc_conf.json -d ./doc .",
     "lint": "eslint .",
     "test": "vitest",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "publish": "npm run build"
   },
   "repository": {
     "type": "git",
