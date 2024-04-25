@@ -43,7 +43,7 @@
     "test": "test"
   },
   "engines": {
-    "node": ">=0.10"
+    "node" : ">=16.0.0" 
   },
   "scripts": {
     "build": "vite build",
