@@ -4,7 +4,7 @@ orbs:
 jobs:
   build:
     docker:
-      - image: circleci/node:10.17.0
+      - image: circleci/node:16.20.2
         environment:
           - MOCHA_OPTS: --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/junit/mocha/mocha.xml
     steps:
