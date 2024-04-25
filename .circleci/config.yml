@@ -22,11 +22,11 @@ jobs:
       # - run:
       #     name: Test
       #     command: npm test
-      - store_artifacts:
-          path: reports/junit/
-          prefix: reports/junit/
-      - store_test_results:
-          path: reports/junit/
+      # - store_artifacts:
+      #     path: reports/junit/
+      #     prefix: reports/junit/
+      # - store_test_results:
+      #     path: reports/junit/
       - sixrs-gke/run-release
       - sixrs-gke/npm-publish
 
