@@ -42,18 +42,19 @@
 
   var fibonacciClient = new ROSLIB.Action({
     ros : ros,
-    name : '/fibonacci',
-    actionType : 'action_tutorials_interfaces/Fibonacci'
+    name : '/pickup_pallet',
+    actionType : 'srsbot_pallet_handling_interfaces/action/PickupPallet'
   });
 
   // Send an action goal
-  var goal = {order: 5};
+  var goal = {frame_id: 'map', pose: {position:{x: 5.37, y:1.05,z:0}, orientation: {x: 0, y:0, z:0, w:1.0 }}}
 
   var goal_id = fibonacciClient.sendGoal(goal, 
   function(result) {
     console.log('Result for action goal on ' + fibonacciClient.name + ': ' + result.result.sequence);
   },
   function(feedback) {
+    console.log(feedback)
     console.log('Feedback for action on ' + fibonacciClient.name + ': ' + feedback.partial_sequence);
   },
   );
