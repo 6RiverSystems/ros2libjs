@@ -16,6 +16,8 @@ import * as ActionLib from './actionlib/index.js';
 import * as Math from './math/index.js';
 import * as Tf from './tf/index.js';
 import * as Urdf from './urdf/index.js';
+import { Buffer } from 'buffer'
+globalThis.Buffer = Buffer
 
 // Add to global namespace for in-browser support (i.e. CDN)
 globalThis.ROSLIB = {

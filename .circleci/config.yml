@@ -1,0 +1,38 @@
+version: 2.1
+orbs:
+  sixrs-gke: sixriversystems/sixrs-gke@3
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.20.2-browsers
+        environment:
+          - MOCHA_OPTS: --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/junit/mocha/mocha.xml
+    steps:
+      - checkout
+      - sixrs-gke/setup-private-npm
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: Npm Install
+          command: node --version && npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+              - ./node_modules
+      # - run:
+      #     name: Test
+      #     command: npm test
+      # - store_artifacts:
+      #     path: reports/junit/
+      #     prefix: reports/junit/
+      # - store_test_results:
+      #     path: reports/junit/
+      - sixrs-gke/run-release
+      - sixrs-gke/npm-publish
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          context: 6rs-circle
