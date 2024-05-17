@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
-import Message from '../core/Message.js';
+
 import ActionClient from './ActionClient.js';
 
 /**
@@ -18,17 +18,18 @@ export default class Goal extends EventEmitter {
   status = undefined;
   result = undefined;
   feedback = undefined;
-  // Create a random ID
-  goalID = 'goal_' + Math.random() + '_' + new Date().getTime();
   /**
    * @param {Object} options
    * @param {ActionClient} options.actionClient - The ROSLIB.ActionClient to use with this goal.
    * @param {Object} options.goalMessage - The JSON object containing the goal for the action server.
+   * @param {string} [options.goalID] - A string ID for the goal. Leave empty to auto-generate a goal ID.
    */
   constructor(options) {
     super();
     this.actionClient = options.actionClient;
 
+    // Create a random ID
+    this.goalID = options.goalID || 'goal_' + Math.random() + '_' + new Date().getTime();
     // Fill in the goal message
     this.goalMessage = {
       goal_id: {
