@@ -90,7 +90,7 @@ export default class ActionClient extends EventEmitter {
       }
       // remove the goal if it is cancelled or aborted
       [5, 6].forEach((status) => {
-        if (statusMessage.statusList.includes(status)) {
+        if (statusMessage.status_list.includes(status)) {
           delete this.goals[statusMessage.status.goal_id.id];
         }
       });
