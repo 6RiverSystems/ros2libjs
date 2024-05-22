@@ -91,7 +91,9 @@ export default class ActionClient extends EventEmitter {
       // remove the goal if it is cancelled or aborted
       [5, 6].forEach((status) => {
         if (statusMessage.status_list.includes(status)) {
-          delete this.goals[statusMessage.status.goal_id.id];
+          if (!!this.goals[statusMessage.status.goal_id.id]) {
+            delete this.goals[statusMessage.status.goal_id.id];
+          }
         }
       });
     });
@@ -111,12 +113,15 @@ export default class ActionClient extends EventEmitter {
     this.resultListener.subscribe((resultMessage) => {
       var goal = this.goals[resultMessage.status.goal_id.id];
 
-      if (goal && !this.omitResult) {
-        goal.emit('status', resultMessage.status);
-        goal.emit('result', resultMessage.result);
+      if (!!goal) {
+        if (!this.omitResult) {
+          goal.emit('status', resultMessage.status);
+          goal.emit('result', resultMessage.result);
+        }
+  
+        // remove the goal if it is completed
+        delete this.goals[goal.goalID];
       }
-      // remove the goal if it is completed
-      delete this.goals[goal.goalID];
     });
 
     // If timeout specified, emit a 'timeout' event if the action server does not respond
