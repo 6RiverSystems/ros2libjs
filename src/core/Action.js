@@ -4,6 +4,7 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
+
 import Ros from '../core/Ros.js';
 
 /**
@@ -65,13 +66,14 @@ export default class Action extends EventEmitter {
    * @param {sendGoalResultCallback} resultCallback - The callback function when the action is completed.
    * @param {sendGoalFeedbackCallback} [feedbackCallback] - The callback function when the action pulishes feedback.
    * @param {sendGoalFailedCallback} [failedCallback] - The callback function when the action failed.
+   * @param {string} [goalID] - The ID of the action goal to send (will be generated and returned if not provided).
    */
-  sendGoal(goal, resultCallback, feedbackCallback, failedCallback) {
+  sendGoal(goal, resultCallback, feedbackCallback, failedCallback, goalID) {
     if (this.isAdvertised) {
       return;
     }
 
-    var actionGoalId =
+    var actionGoalId = goalID ||
       'send_action_goal:' + this.name + ':' + ++this.ros.idCounter;
 
     if (resultCallback || failedCallback) {
