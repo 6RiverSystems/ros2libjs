@@ -3,15 +3,15 @@
  * @author Brandon Alexander - baalexander@gmail.com
  */
 
-import socketAdapter from './SocketAdapter.js';
+import { EventEmitter } from 'eventemitter3';
 
-import Topic from './Topic.js';
-import Service from './Service.js';
-import Param from './Param.js';
-import TFClient from '../tf/TFClient.js';
 import ActionClient from '../actionlib/ActionClient.js';
 import SimpleActionServer from '../actionlib/SimpleActionServer.js';
-import { EventEmitter } from 'eventemitter3';
+import TFClient from '../tf/TFClient.js';
+import Param from './Param.js';
+import Service from './Service.js';
+import socketAdapter from './SocketAdapter.js';
+import Topic from './Topic.js';
 
 /**
  * Manages connection to the server and all interactions with ROS.
@@ -78,6 +78,19 @@ export default class Ros extends EventEmitter {
       }
     } else {
       throw 'Unknown transportLibrary: ' + this.transportLibrary.toString();
+    }
+  }
+  /**
+   * Connects to an existing socket
+   *
+   * @param {WebSocket} socket
+   */
+  attachSocket(socket) {
+    if (this.transportLibrary.constructor.name === 'websocket') {
+      socket.binaryType = 'arraybuffer';
+      this.socket = Object.assign(socket, socketAdapter(this));
+    } else {
+      throw 'attachSocket only supported for websocket transportLibrary';
     }
   }
   /**
