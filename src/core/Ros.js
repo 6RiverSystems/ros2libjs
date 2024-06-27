@@ -83,12 +83,13 @@ export default class Ros extends EventEmitter {
   /**
    * Connects to an existing socket
    *
-   * @param {WebSocket} socket
+   * @param {WebSocket&EventEmitter} socket
    */
   attachSocket(socket) {
     if (this.transportLibrary === 'websocket') {
       socket.binaryType = 'arraybuffer';
       this.socket = Object.assign(socket, socketAdapter(this));
+      socket.emit('open');
     } else {
       throw 'attachSocket only supported for websocket transportLibrary';
     }
