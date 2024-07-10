@@ -15,6 +15,11 @@ export default defineConfig({
     nodePolyfills(),
   ],
   build: {
+    minify: false,
+    terserOptions: {
+      compress: false,
+      mangle: false,
+    },
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, 'src/RosLib.js'),
