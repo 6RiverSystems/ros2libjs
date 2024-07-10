@@ -64,10 +64,12 @@ export default class Ros extends EventEmitter {
       if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
         // Detect if in browser vs in NodeJS
         if (typeof window !== 'undefined') {
+          console.log(`detected browser, typeof window === ${typeof window}`, window)
           const sock = new WebSocket(url);
           sock.binaryType = 'arraybuffer';
           this.socket = Object.assign(sock, socketAdapter(this));
         } else {
+          console.log('detected Node.js, typeof window === undefined')
           // if in Node.js, import ws to replace browser WebSocket API
           import('ws').then((ws) => {
             const sock = new ws.WebSocket(url);
