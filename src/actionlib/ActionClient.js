@@ -3,10 +3,10 @@
  * @author Russell Toris - rctoris@wpi.edu
  */
 
-import Topic from '../core/Topic.js';
-import Message from '../core/Message.js';
-import Ros from '../core/Ros.js';
 import { EventEmitter } from 'eventemitter3';
+
+import Ros from '../core/Ros.js';
+import Topic from '../core/Topic.js';
 
 /**
  * An actionlib action client.
@@ -78,17 +78,25 @@ export default class ActionClient extends EventEmitter {
     this.cancelTopic.advertise();
 
     // subscribe to the status topic
-    if (!this.omitStatus) {
-      this.statusListener.subscribe((statusMessage) => {
-        this.receivedStatus = true;
+    this.statusListener.subscribe((statusMessage) => {
+      this.receivedStatus = true;
+      if (!this.omitStatus) {
         statusMessage.status_list.forEach((status) => {
           var goal = this.goals[status.goal_id.id];
           if (goal) {
             goal.emit('status', status);
           }
         });
+      }
+      // remove the goal if it is cancelled or aborted
+      [5, 6].forEach((status) => {
+        if (statusMessage.status_list.includes(status)) {
+          if (!!this.goals[statusMessage.status.goal_id.id]) {
+            delete this.goals[statusMessage.status.goal_id.id];
+          }
+        }
       });
-    }
+    });
 
     // subscribe the the feedback topic
     if (!this.omitFeedback) {
@@ -102,16 +110,19 @@ export default class ActionClient extends EventEmitter {
     }
 
     // subscribe to the result topic
-    if (!this.omitResult) {
-      this.resultListener.subscribe((resultMessage) => {
-        var goal = this.goals[resultMessage.status.goal_id.id];
+    this.resultListener.subscribe((resultMessage) => {
+      var goal = this.goals[resultMessage.status.goal_id.id];
 
-        if (goal) {
+      if (!!goal) {
+        if (!this.omitResult) {
           goal.emit('status', resultMessage.status);
           goal.emit('result', resultMessage.result);
         }
-      });
-    }
+  
+        // remove the goal if it is completed
+        delete this.goals[goal.goalID];
+      }
+    });
 
     // If timeout specified, emit a 'timeout' event if the action server does not respond
     if (this.timeout) {
@@ -135,14 +146,8 @@ export default class ActionClient extends EventEmitter {
   dispose() {
     this.goalTopic.unadvertise();
     this.cancelTopic.unadvertise();
-    if (!this.omitStatus) {
-      this.statusListener.unsubscribe();
-    }
-    if (!this.omitFeedback) {
-      this.feedbackListener.unsubscribe();
-    }
-    if (!this.omitResult) {
-      this.resultListener.unsubscribe();
-    }
+    this.statusListener.unsubscribe();
+    this.feedbackListener.unsubscribe();
+    this.resultListener.unsubscribe();
   }
 }

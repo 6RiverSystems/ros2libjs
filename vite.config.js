@@ -1,7 +1,8 @@
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
+import dts from 'vite-plugin-dts';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
   plugins: [
@@ -10,9 +11,15 @@ export default defineConfig({
     }),
     checker({
       typescript: true
-    })
+    }),
+    nodePolyfills(),
   ],
   build: {
+    minify: false,
+    terserOptions: {
+      compress: false,
+      mangle: false,
+    },
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, 'src/RosLib.js'),

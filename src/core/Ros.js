@@ -3,15 +3,15 @@
  * @author Brandon Alexander - baalexander@gmail.com
  */
 
-import socketAdapter from './SocketAdapter.js';
+import { EventEmitter } from 'eventemitter3';
 
-import Topic from './Topic.js';
-import Service from './Service.js';
-import Param from './Param.js';
-import TFClient from '../tf/TFClient.js';
 import ActionClient from '../actionlib/ActionClient.js';
 import SimpleActionServer from '../actionlib/SimpleActionServer.js';
-import { EventEmitter } from 'eventemitter3';
+import TFClient from '../tf/TFClient.js';
+import Param from './Param.js';
+import Service from './Service.js';
+import socketAdapter from './SocketAdapter.js';
+import Topic from './Topic.js';
 
 /**
  * Manages connection to the server and all interactions with ROS.
@@ -61,7 +61,7 @@ export default class Ros extends EventEmitter {
         socketAdapter(this)
       );
     } else if (this.transportLibrary === 'websocket') {
-      if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
+      if (!this.socket || this.socket.readyState === /* WebSocket.CLOSED */ 3) {
         // Detect if in browser vs in NodeJS
         if (typeof window !== 'undefined') {
           const sock = new WebSocket(url);
@@ -78,6 +78,20 @@ export default class Ros extends EventEmitter {
       }
     } else {
       throw 'Unknown transportLibrary: ' + this.transportLibrary.toString();
+    }
+  }
+  /**
+   * Connects to an existing socket
+   *
+   * @param {WebSocket&EventEmitter} socket
+   */
+  attachSocket(socket) {
+    if (this.transportLibrary === 'websocket') {
+      socket.binaryType = 'arraybuffer';
+      this.socket = Object.assign(socket, socketAdapter(this));
+      socket.emit('open');
+    } else {
+      throw 'attachSocket only supported for websocket transportLibrary';
     }
   }
   /**
