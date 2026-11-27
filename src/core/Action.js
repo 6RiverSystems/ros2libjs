@@ -6,6 +6,7 @@
 import { EventEmitter } from 'eventemitter3';
 
 import Ros from '../core/Ros.js';
+import { GoalStatus } from '../core/GoalStatus.js';
 
 /**
  * A ROS 2 action client.
@@ -56,6 +57,8 @@ export default class Action extends EventEmitter {
   /**
    * @callback sendGoalFailedCallback
    * @param {string} error - The error message reported by ROS.
+   * @param {number} [status] - The goal status reported by ROS.
+   * @param {TResult} [result] - The result from the action, if it finished without succeeding.
    */
   /**
    * Sends an action goal. Returns the feedback in the feedback callback while the action is running
@@ -77,23 +80,34 @@ export default class Action extends EventEmitter {
       'send_action_goal:' + this.name + ':' + ++this.ros.idCounter;
 
     if (resultCallback || failedCallback) {
-      this.ros.on(actionGoalId, function (message) {
+      var listener = (message) => {
+        if (message.op === 'action_result') {
+          this.ros.off(actionGoalId, listener);
+        }
         if (message.result !== undefined && message.result === false) {
           if (typeof failedCallback === 'function') {
-            failedCallback(message.values);
+            failedCallback(message.values, message.status);
           }
         } else if (
           message.op === 'action_feedback' &&
           typeof feedbackCallback === 'function'
         ) {
           feedbackCallback(message.values);
-        } else if (
-          message.op === 'action_result' &&
-          typeof resultCallback === 'function'
-        ) {
-          resultCallback(message.values);
+        } else if (message.op === 'action_result') {
+          if (message.status === GoalStatus.STATUS_SUCCEEDED) {
+            if (typeof resultCallback === 'function') {
+              resultCallback(message.values);
+            }
+          } else if (typeof failedCallback === 'function') {
+            failedCallback(
+              'Action finished with status ' + message.status,
+              message.status,
+              message.values
+            );
+          }
         }
-      });
+      };
+      this.ros.on(actionGoalId, listener);
     }
 
     var call = {
@@ -218,6 +232,25 @@ export default class Action extends EventEmitter {
       id: id,
       action: this.name,
       values: result,
+      status: GoalStatus.STATUS_SUCCEEDED,
+      result: true
+    };
+    this.ros.callOnConnection(call);
+  }
+
+  /**
+   * Helper function to set an action as canceled.
+   *
+   * @param {string} id - The action goal ID.
+   * @param {TResult} result - The result to set.
+   */
+  setCanceled(id, result) {
+    var call = {
+      op: 'action_result',
+      id: id,
+      action: this.name,
+      values: result,
+      status: GoalStatus.STATUS_CANCELED,
       result: true
     };
     this.ros.callOnConnection(call);
@@ -233,6 +266,7 @@ export default class Action extends EventEmitter {
       op: 'action_result',
       id: id,
       action: this.name,
+      status: GoalStatus.STATUS_ABORTED,
       result: false
     };
     this.ros.callOnConnection(call);
